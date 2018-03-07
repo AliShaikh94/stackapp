@@ -13,6 +13,9 @@ import android.support.v7.widget.RecyclerView.LayoutManager
 import android.support.v7.widget.RecyclerView.VERTICAL
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import com.alishaikh.wagchallenge.R.id.userList
 import com.alishaikh.wagchallenge.di.DaggerAppComponent
 import com.alishaikh.wagchallenge.repo.UsersRepository
@@ -20,7 +23,7 @@ import com.alishaikh.wagchallenge.vo.User
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-
+import com.alishaikh.wagchallenge.repo.UsersRepository.Sorts
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import javax.inject.Inject
@@ -46,8 +49,11 @@ class MainActivity : AppCompatActivity() {
         })[UsersListViewModel::class.java]
 
         initAdapter()
-
-        model.loadPage(1)
+        initTopBar()
+//        model.loadInits()
+        savedInstanceState?.get("state")?.let {
+            model.state.value = it as UsersListViewModel.State
+        }
 
         next.setOnClickListener {
             model.nextPage()
@@ -71,6 +77,41 @@ class MainActivity : AppCompatActivity() {
         model.users.observe(this, Observer<List<User>> {
             adapter.update(it)
         })
+    }
+
+    fun initTopBar() {
+//        val sortOptions = listOf(Sorts.Creation, Sorts.Modified, Sorts.Name, Sorts.Reputation).map { it.name }
+        val sortAdapter = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, Sorts.values())
+        Sort.adapter = sortAdapter
+        Sort.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) { }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                model.changeSort(sortAdapter.getItem(position))
+            }
+        }
+
+        val orderAdapter = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, UsersRepository.Orders.values())
+        Order.adapter = orderAdapter
+        Order.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) { }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                model.changeOrder(orderAdapter.getItem(position))
+            }
+        }
+
+        model.state.observe(this, Observer {
+            Sort.setSelection(sortAdapter.getPosition(it?.sort))
+            Order.setSelection(orderAdapter.getPosition(it?.order))
+            val text = "Page ${it?.page ?: 0}"
+            pageText.text = text
+        })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putSerializable("state", model.state.value)
+        super.onSaveInstanceState(outState)
     }
 
 }

@@ -35,4 +35,16 @@ class UsersRepository(val usersApi: UsersApi) {
         })
         return data
     }
+
+    enum class Orders(val id: String) {
+        Descending("desc"),
+        Ascending("asc")
+    }
+
+    enum class Sorts(val id: String) {
+        Reputation("reputation"),
+        Name("name"),
+        Creation("creation"),
+        Modified("modified")
+    }
 }
