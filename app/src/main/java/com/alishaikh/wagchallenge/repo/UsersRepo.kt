@@ -2,6 +2,7 @@ package com.alishaikh.wagchallenge.repo
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.LiveData
+import android.util.Log
 import com.alishaikh.wagchallenge.api.UsersApi
 import com.alishaikh.wagchallenge.vo.User
 import retrofit2.Call
@@ -22,12 +23,13 @@ class UsersRepository(val usersApi: UsersApi) {
         usersApi.getUsersAtPage(page, order, sort, "stackoverflow").enqueue(
                 object : Callback<UsersResponse> {
                     override fun onFailure(call: Call<UsersResponse>?, t: Throwable?) {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        Log.d("UsersRepo", t.toString())
                     }
                     override fun onResponse(call: Call<UsersResponse>, response: Response<UsersResponse>) {
                         if(response.isSuccessful) {
-                            val items = response.body()?.items
-                            data.setValue(items)
+                            val items = (response.body() as UsersResponse).items
+
+                            data.value = items
                         }
                     }
         })

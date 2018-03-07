@@ -30,11 +30,11 @@ interface UsersApi {
         fun create(): UsersApi = create(HttpUrl.parse(BASE_URL)!!)
         fun create(httpUrl: HttpUrl): UsersApi {
 
-            val client = OkHttpClient.Builder()
-                    .build()
+//            val client = OkHttpClient.Builder()
+//                    .build()
             return Retrofit.Builder()
                     .baseUrl(httpUrl)
-                    .client(client)
+//                    .client(client)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
                     .create(UsersApi::class.java)
