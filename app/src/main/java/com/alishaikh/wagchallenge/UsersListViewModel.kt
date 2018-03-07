@@ -8,6 +8,7 @@ import android.arch.lifecycle.ViewModel
 import com.alishaikh.wagchallenge.api.UsersApi
 import com.alishaikh.wagchallenge.repo.UsersRepository
 import com.alishaikh.wagchallenge.vo.User
+import com.bumptech.glide.Glide.init
 import java.io.Serializable
 import java.util.*
 
@@ -24,13 +25,25 @@ class UsersListViewModel(val repo: UsersRepository): ViewModel() {
 //    val currentSort = MutableLiveData<UsersRepository.Sorts>()
 
 //
+    private var repoResult = map(state, {
+        repo.getUsers(it.page, it.order.id, it.sort.id)
+    })
+
     init {
         state.value = State()
     }
 
-    var users = switchMap(state, {
-        repo.getUsers(it.page, it.order.id, it.sort.id)
+    var users = switchMap(repoResult, {
+        it.list
     })
+
+    val networkState = switchMap(repoResult, {
+        it.networkState
+    })
+
+    fun retry() {
+        repoResult.value?.retry?.invoke()
+    }
 
 
     fun prevPage() {
